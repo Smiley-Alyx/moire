@@ -1,28 +1,48 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
+import MainPage from '@/pages/MainPage.vue';
+import ProductPage from '@/pages/ProductPage.vue';
+import CartPage from '@/pages/CartPage.vue';
+import NotFoundPage from '@/pages/NotFoundPage.vue';
+import OrderPage from "@/pages/OrderPage";
+import OrderInfoPage from "@/pages/OrderInfoPage";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
+    name: 'main',
+    component: MainPage,
     path: '/',
-    name: 'Home',
-    component: Home,
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    name: 'product',
+    component: ProductPage,
+    path: '/product/:id',
+  },
+  {
+    name: 'cart',
+    component: CartPage,
+    path: '/cart/',
+  },
+  {
+    name: 'order',
+    component: OrderPage,
+    path: '/order/',
+  },
+  {
+    name: 'orderInfo',
+    component: OrderInfoPage,
+    path: '/order/:id',
+  },
+  {
+    name: 'notFound',
+    component: NotFoundPage,
+    path: '*',
   },
 ];
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
   routes,
 });
 
