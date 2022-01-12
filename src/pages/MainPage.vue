@@ -645,7 +645,7 @@
           Каталог
         </h1>
         <span class="content__info">
-          152 товара
+          {{ countProductsString }}
         </span>
       </div>
 
@@ -676,6 +676,7 @@
 import ProductList from '@/components/ProductList.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import ProductFilter from '@/components/ProductFilter.vue';
+import declension from "@/helpers/declension";
 import axios from 'axios';
 import {API_BASE_URL} from "../config";
 
@@ -690,9 +691,10 @@ export default {
       filterPriceFrom: 0,
       filterPriceTo: 0,
       filterCategoryId: 0,
-      filterColorId: 0,
+      filterMaterials: 0,
+      filterSeasons: 0,
       page: 1,
-      productPerPage: 3,
+      productPerPage: 12,
       productsData: null,
       productsLoading: false,
       productsLoadingFailed: false,
@@ -704,7 +706,7 @@ export default {
         ? this.productsData.items.map(product => {
           return {
             ...product,
-            image: product.image.file.url
+            image: product.colors[0].gallery[0].file.url
           }
         })
         : [];
@@ -713,6 +715,17 @@ export default {
       return this.productsData
         ? this.productsData.pagination.total
         : 0;
+    },
+    countProductsString() {
+      return (
+        this.countProducts +
+        " " +
+        declension([
+          'товар',
+          'товара',
+          'товаров',
+        ], this.countProducts)
+      );
     },
   },
   methods: {
@@ -727,15 +740,24 @@ export default {
               page: this.page,
               limit: this.productPerPage,
               categoryId: this.filterCategoryId,
-              colorId: this.filterColorId,
               minPrice: this.filterPriceFrom,
               maxPrice: this.filterPriceTo,
+              colorsList: [],
+              materialsList: this.filterMaterials,
+              seasonsPrice: this.filterSeasons,
             }
           })
-          .then(response => this.productsData = response.data)
-          .catch(() => { this.productsLoadingFailed = true; })
-          .then(() => { this.productsLoading = false; });
-      }, 500);
+          .then((response) => {
+            this.productsData = response.data;
+            console.log(this.productsData);
+          })
+          .catch(() => {
+            this.productsLoadingFailed = true;
+          })
+          .then(() => {
+            this.productsLoading = false;
+          });
+      }, 0);
     },
   },
   watch: {

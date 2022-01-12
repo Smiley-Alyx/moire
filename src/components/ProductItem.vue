@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <li class="catalog__item">
     <router-link
       class="catalog__pic"
       href="#"
@@ -42,7 +42,7 @@
         </label>
       </li>
     </ul>
-  </div>
+  </li>
 </template>
 
 <script>
