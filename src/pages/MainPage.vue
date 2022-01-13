@@ -654,7 +654,6 @@
           :price-from.sync="filterPriceFrom"
           :price-to.sync="filterPriceTo"
           :category-id.sync="filterCategoryId"
-          :color-id.sync="filterColorId"
           :page.sync="page"
         />
         <section class="catalog">
@@ -749,7 +748,6 @@ export default {
           })
           .then((response) => {
             this.productsData = response.data;
-            console.log(this.productsData);
           })
           .catch(() => {
             this.productsLoadingFailed = true;
@@ -773,9 +771,11 @@ export default {
     filterCategoryId() {
       this.loadProducts();
     },
+    /*
     filterColorId() {
       this.loadProducts();
     },
+     */
   },
   created() {
     this.loadProducts();

@@ -1,0 +1,44 @@
+<template>
+  <ul>
+    <li class="colors__item"
+      v-for="color in colors"
+      :key="color.id"
+    >
+      <label class="colors__label">
+        <input class="colors__radio sr-only"
+           type="radio"
+           :name="'color-' + productId"
+           :value="color.id"
+           v-model="pickerColor"
+        >
+        <span class="colors__value"
+          :style="{'background-color': color.color.code, 'border': '1px solid lightgrey'}"
+          :title="color.title"
+        >
+        </span>
+      </label>
+    </li>
+  </ul>
+</template>
+
+<script>
+export default {
+  name: 'ColorPicker',
+  props: [
+    'colors',
+    'currentColor',
+    'productId',
+  ],
+  computed: {
+    pickerColor: {
+      get() {
+        return this.currentColor
+      },
+      set(value) {
+        this.$emit('currentColor', value)
+      }
+    }
+  },
+};
+</script>
+
