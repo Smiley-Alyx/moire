@@ -46,9 +46,6 @@ export default {
       let colorId = this.product.colors.findIndex((color) => {
         return color.id === this.currentColor;
       });
-      console.log(this.currentColor);
-      console.log(this.product.id);
-      console.log(colorId);
       return this.product.colors[colorId].gallery
         ? this.product.colors[colorId].gallery[0].file.url
         : "/img/not_image.png";

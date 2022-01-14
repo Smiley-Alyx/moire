@@ -663,7 +663,11 @@
             <button @click.prevent="loadProducts">Попробовать ещё раз!</button>
           </div>
           <ProductList v-if="!productsLoading" :products="products"/>
-          <BasePagination v-model="page" :count="countProducts" :per-page="productPerPage" />
+          <BasePagination
+            v-model="page"
+            :count="countProducts"
+            :per-page="productPerPage"
+          />
         </section>
 
       </div>
@@ -693,7 +697,7 @@ export default {
       filterMaterials: 0,
       filterSeasons: 0,
       page: 1,
-      productPerPage: 12,
+      productPerPage: 6,
       productsData: null,
       productsLoading: false,
       productsLoadingFailed: false,
@@ -701,14 +705,7 @@ export default {
   },
   computed: {
     products() {
-      return this.productsData
-        ? this.productsData.items.map(product => {
-          return {
-            ...product,
-            image: product.colors[0].gallery[0].file.url
-          }
-        })
-        : [];
+      return this.productsData ? this.productsData.items : [];
     },
     countProducts() {
       return this.productsData
@@ -771,11 +768,6 @@ export default {
     filterCategoryId() {
       this.loadProducts();
     },
-    /*
-    filterColorId() {
-      this.loadProducts();
-    },
-     */
   },
   created() {
     this.loadProducts();

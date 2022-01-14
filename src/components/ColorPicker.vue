@@ -32,10 +32,10 @@ export default {
   computed: {
     pickerColor: {
       get() {
-        return this.currentColor
+        return this.currentColor;
       },
       set(value) {
-        this.$emit('currentColor', value)
+        this.$emit('update:currentColor', value);
       }
     }
   },
