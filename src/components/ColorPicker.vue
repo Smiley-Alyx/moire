@@ -7,7 +7,6 @@
       <label class="colors__label">
         <input class="colors__radio sr-only"
            type="radio"
-           :name="'color-' + productId"
            :value="color.id"
            v-model="pickerColor"
         >
@@ -24,11 +23,7 @@
 <script>
 export default {
   name: 'ColorPicker',
-  props: [
-    'colors',
-    'currentColor',
-    'productId',
-  ],
+  props: ['colors', 'currentColor'],
   computed: {
     pickerColor: {
       get() {
@@ -41,4 +36,3 @@ export default {
   },
 };
 </script>
-

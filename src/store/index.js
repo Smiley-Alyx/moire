@@ -3,13 +3,17 @@ import Vuex from 'vuex';
 import axios from "axios";
 import {API_BASE_URL} from "@/config";
 import declension from "@/helpers/declension";
-import catalog from "./modules/catalog/index";
+import catalog from "@/store/modules/catalog";
+import product from "@/store/modules/product";
+import cart from '@/store/modules/cart';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   modules: {
-    catalog
+    catalog,
+    product,
+    cart,
   },
   state: {
     cartProducts: [],
