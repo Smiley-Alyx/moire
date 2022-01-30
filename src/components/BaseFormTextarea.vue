@@ -1,13 +1,21 @@
 <template>
-  <BaseFormField :title="title" :error="error">
-    <textarea class="form__input form__input--area" v-model="dataValue" type="text" :placeholder="placeholder"></textarea>
+  <BaseFormField
+    :title="title"
+    :error="error"
+  >
+    <textarea
+      v-model="dataValue"
+      class="form__input form__input--area"
+      name="name"
+      :placeholder="placeholder"
+    />
   </BaseFormField>
 </template>
 
 <script>
-  import formFieldMixin from "@/mixins/formFieldMixin";
+import formFieldMixin from '@/mixins/formFieldMixin';
 
-  export default  {
-    mixins: [formFieldMixin]
-  }
+export default {
+  mixins: [formFieldMixin]
+};
 </script>

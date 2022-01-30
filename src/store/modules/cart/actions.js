@@ -103,4 +103,20 @@ export default {
         });
     });
   },
+  loadOrderInfo(context, orderId) {
+    return new Promise((resolve, reject) => {
+      axios
+        .get(API_BASE_URL + `/api/orders` + orderId, {
+          params: { userAccessKey: context.state.userAccessKey }
+        })
+        .then(response => {
+          context.commit('updateOrderInfo', response.data);
+          resolve();
+        })
+        .catch((err) => {
+          console.log(err);
+          reject();
+        });
+    });
+  },
 };
