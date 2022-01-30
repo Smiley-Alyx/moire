@@ -121,16 +121,15 @@ export default {
     CartIndicator,
   },
   created() {
-    this.loadCart();
-    const userAccessKey = localStorage.getItem('userAccessKey');
+    let userAccessKey = localStorage.getItem('userAccessKey')
     if (userAccessKey) {
-      this.updateUserAccessKey(userAccessKey);
+      this.updateUserAccessKey(userAccessKey)
     }
-
+    this.loadCart()
   },
   methods: {
-    ...mapActions(['loadCart']),
-    ...mapMutations(['updateUserAccessKey'])
+    ...mapActions("cart", ['loadCart']),
+    ...mapMutations("cart", ['updateUserAccessKey'])
   }
 };
 </script>

@@ -2,24 +2,30 @@
   <li class="cart__item product">
     <div class="product__pic">
       <img
-        :src="item.product.image"
+        :src="item.product.color.gallery[0].file.url"
         width="120"
         height="120"
-        :alt="item.product.title"
+        :alt="item.product.product.title"
       >
     </div>
     <h3 class="product__title">
-      {{ item.product.title }}
+      {{ item.product.product.title }}
     </h3>
+    <p class="product__info product__info--color">
+      Цвет:
+      <span>
+        <i :style="{'background-color': item.product.color.color.code}"></i>
+        {{ item.product.color.color.title }}
+      </span>
+    </p>
     <span class="product__code">
-      Артикул: {{ item.product.id }}
+      Артикул: {{ item.productId }} Размер: {{ item.product.size.title }}
     </span>
 
-    <div class="product__counter form__counter">
-      <ProductMinus v-model="amount"/>
-      <input type="text" v-model.number="amount" name="count" oninput="if(this.value < 1) this.value = 1;">
-      <ProductPlus v-model="amount"/>
-    </div>
+    <BaseCounter
+      class="product__counter form__counter"
+      :amount.sync="amount"
+    />
 
     <b class="product__price">
       {{ (item.amount * item.product.price) | numberFormat }} ₽
@@ -29,7 +35,7 @@
       class="product__del button-del"
       type="button"
       aria-label="Удалить товар из корзины"
-      @click.prevent="deleteProduct(item.productId)"
+      @click="deleteProduct(item.basketItemId)"
     >
       <svg width="20" height="20" fill="currentColor">
         <use xlink:href="#icon-close"></use>
@@ -39,46 +45,33 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
 import numberFormat from '@/helpers/numberFormat';
-import ProductPlus from '@/components/ProductPlus.vue';
-import ProductMinus from '@/components/ProductMinus.vue';
+import { mapActions } from 'vuex';
+import BaseCounter from '@/components/BaseCounter';
 
 export default {
+  name: 'CartItem',
   props: ['item'],
-  components: {
-    ProductPlus,
-    ProductMinus,
-  },
-  filters: {
-    numberFormat,
-  },
+  components: { BaseCounter },
+  filters: { numberFormat },
   computed: {
     amount: {
       get() {
         return this.item.amount;
       },
       set(value) {
-        this.$store.dispatch(
-          'updateCartProductAmount',
-          {
-            productId: this.item.productId,
-            amount: value,
-          },
-        );
-      },
-    },
+        this.updateAmount({
+          basketItemId: this.item.basketItemId,
+          amount: value
+        });
+      }
+    }
   },
   methods: {
-    ...mapMutations({
-      deleteProduct: 'deleteCartProduct',
-    }),
-    productIncrement() {
-
-    },
-    deleteProduct(productId) {
-      this.$store.dispatch('deleteCartProduct', productId);
-    },
-  },
+    ...mapActions('cart', {
+      deleteProduct: 'removeCartProduct',
+      updateAmount: 'updateCartProductAmount',
+    })
+  }
 };
 </script>
