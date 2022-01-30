@@ -1,3 +1,3 @@
 module.exports = {
-  publicPath: '/module-deploy'
+  publicPath: '/moire-deploy'
 }
