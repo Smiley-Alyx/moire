@@ -6,11 +6,23 @@
       <fieldset class="form__block">
         <legend class="form__legend">Цена</legend>
         <label class="form__label form__label--price">
-          <input class="form__input" type="text" name="min-price" v-model.number="currentPriceFrom">
+          <input
+            class="form__input"
+            type="text"
+            name="min-price"
+            placeholder="0"
+            v-model.number="currentPriceFrom"
+          >
           <span class="form__value">От</span>
         </label>
         <label class="form__label form__label--price">
-          <input class="form__input" type="text" name="max-price" v-model.number="currentPriceTo">
+          <input
+            class="form__input"
+            type="text"
+            name="max-price"
+            placeholder="0"
+            v-model.number="currentPriceTo"
+          >
           <span class="form__value">До</span>
         </label>
       </fieldset>
@@ -18,7 +30,12 @@
       <fieldset class="form__block">
         <legend class="form__legend">Категория</legend>
         <label class="form__label form__label--select">
-          <select class="form__select" type="text" name="category" v-model="currentCategoryId">
+          <select
+            class="form__select"
+            type="text"
+            name="category"
+            v-model="currentCategory"
+          >
             <option value="0">Все категории</option>
             <option
               :value="category.id"
@@ -29,7 +46,7 @@
         </label>
       </fieldset>
 
-      <fieldset class="form__block">
+<!--      <fieldset class="form__block">
         <legend class="form__legend">Цвет</legend>
         <ul class="colors">
           <li class="colors__item" v-for="color in colors" :key="color.id">
@@ -40,19 +57,21 @@
                 name="color"
                 :value="color.id"
                 :title="color.title"
-                :checked="color.id == currentColorId"
-                v-model="currentColors"
+                v-model.number="currentColors"
               >
               <span class="colors__value" :style="{ backgroundColor: color.code }" :title="color.title"></span>
             </label>
           </li>
         </ul>
-      </fieldset>
+      </fieldset>-->
 
       <fieldset class="form__block">
         <legend class="form__legend">Материал</legend>
         <ul class="check-list">
-          <li class="check-list__item" v-for="material in materials" :key="material.id">
+          <li class="check-list__item"
+              v-for="material in materials"
+              :key="material.id"
+          >
             <label class="check-list__label">
               <input
                 class="check-list__check sr-only"
@@ -74,18 +93,22 @@
       <fieldset class="form__block">
         <legend class="form__legend">Коллекция</legend>
         <ul class="check-list">
-          <li class="check-list__item" v-for="season in seasons" :key="season.id">
+          <li class="check-list__item"
+              v-for="season in seasons"
+              :key="season.id"
+          >
             <label class="check-list__label">
               <input
                 class="check-list__check sr-only"
                 type="checkbox"
+                name="collection"
                 :id="season.id"
                 :value="season.id"
                 v-model.number="currentSeasons"
               >
               <span class="check-list__desc">
-                {{ season.title }}
-                <span>({{ season.productsCount }})</span>
+                  {{ season.title }}
+                  <span>({{ season.productsCount }})</span>
               </span>
             </label>
           </li>
@@ -110,108 +133,79 @@
 
 <script>
 import BaseSubmit from '@/components/BaseSubmit';
-import axios from "axios";
-import {API_BASE_URL} from "../config";
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
+  name: 'ProductFilter',
   components: { BaseSubmit },
   data() {
     return {
-      currentCategoryId: 0,
-      currentMaterials: [],
+      currentPriceFrom: "",
+      currentPriceTo: "",
+      currentCategory: 0,
+      //currentColors: [],
       currentSeasons: [],
-      currentColorList: [],
-      page: 0,
-      currentPriceFrom: 0,
-      currentPriceTo: 0,
-
-      categoriesData: null,
-      materialsData: null,
-      seasonsData: null,
-      colorsData: null,
-    };
+      currentMaterials: [],
+    }
   },
   props: [
-    'categoryId',
-    'materialsList',
-    'seasonsList',
-    'colorList',
     'priceFrom',
     'priceTo',
+    'categoryId'
   ],
   computed: {
-    categories() {
-      return this.categoriesData ? this.categoriesData.items : [];
-    },
-    colors() {
-      return this.colorsData ? this.colorsData.items : [];
-    },
-    materials() {
-      return this.materialsData ? this.materialsData.items : [];
-    },
-    seasons() {
-      return this.seasonsData ? this.seasonsData.items : [];
-    },
+    ...mapGetters("catalog", {
+      categories: "getProductCategories",
+      //colors: "getColors",
+      seasons: "getSeasons",
+      materials: "getMaterials",
+      loading: "getProductsLoading",
+    }),
   },
   watch: {
     priceFrom(value) {
-      this.currentPriceFrom = value;
+      this.currentPriceFrom = value
     },
     priceTo(value) {
-      this.currentPriceTo = value;
+      this.currentPriceTo = value
     },
     categoryId(value) {
-      this.currentCategoryId = value;
-    },
-    colorList(value) {
-      this.currentColorList = value;
-    },
-    seasonsList(value) {
-      this.currentSeasons = value;
-    },
-    materialsList(value) {
-      this.currentMaterials = value;
+      this.currentCategory = value
     },
   },
   methods: {
+    ...mapActions("catalog", [
+      "loadProductCategories",
+      //"loadColors",
+      "loadSeasons",
+      "loadMaterials"
+    ]),
     submit() {
-      this.$emit('update:categoryId', this.currentCategoryId);
-      this.$emit('update:materialsList', this.currentMaterials);
-      this.$emit('update:seasonsList', this.currentSeasons);
-      this.$emit('update:colorList', this.currentColorList);
-      this.$emit('update:page', 1);
-      this.$emit('update:priceFrom', this.currentPriceFrom);
-      this.$emit('update:priceTo', this.currentPriceTo);
+      this.$emit("updateFilter", {
+        priceFrom : this.currentPriceFrom,
+        priceTo : this.currentPriceTo,
+        categoryId : this.currentCategory,
+        //colors : this.currentColors,
+        seasons : this.currentSeasons,
+        materials : this.currentMaterials,
+      });
     },
     reset() {
-      this.$emit('update:categoryId', 0);
-      this.$emit('update:materialsList', []);
-      this.$emit('update:seasonsList', []);
-      this.$emit('update:colorList', []);
-      this.$emit('update:page', 1);
-      this.$emit('update:priceFrom', 0);
-      this.$emit('update:priceTo', 0);
-    },
-    loadCategories() {
-      axios(API_BASE_URL + `/api/productCategories`)
-        .then(response => this.categoriesData = response.data);
-    },
-    loadColors() {
-      axios(API_BASE_URL + `/api/colors`)
-        .then(response => this.colorsData = response.data);
-    },
-    loadMaterials() {
-      axios(API_BASE_URL + `/api/materials`)
-        .then(response => this.materialsData = response.data);
-    },
-    loadSeasons() {
-      axios(API_BASE_URL + `/api/seasons`)
-        .then(response => this.seasonsData = response.data);
+      this.$emit("updateFilter", {
+        priceFrom : "",
+        priceTo : "",
+        categoryId : 0,
+        //colors : [],
+        seasons : [],
+        materials : [],
+      });
+      this.currentSeasons = [];
+      this.currentMaterials = [];
     },
   },
   created() {
-    this.loadCategories();
-    this.loadColors();
+    this.loadProductCategories();
+    //this.loadColors();
     this.loadMaterials();
     this.loadSeasons();
   },

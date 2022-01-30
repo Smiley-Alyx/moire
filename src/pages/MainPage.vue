@@ -12,25 +12,28 @@
 
       <div class="content__catalog">
         <ProductFilter
-          :category-id.sync="filterCategoryId"
-          :materials-list.sync="filterMaterials"
-          :seasons-list.sync="filterSeasons"
-          :color-list.sync="filterColors"
-          :page.sync="page"
-          :price-from.sync="filterPriceFrom"
-          :price-to.sync="filterPriceTo"
+          :priceFrom="filterPriceFrom"
+          :priceTo="filterPriceTo"
+          :categoryId="filterCategory"
+          :seasons="filterSeasons"
+          :materials="filterMaterials"
+          @updateFilter="updateFilter"
         />
         <section class="catalog">
-          <div v-if="productsLoading">Загрузка товаров...</div>
+          <div v-if="productsLoading">
+            Загрузка товаров
+          </div>
           <div v-if="productsLoadingFailed">
-            Загрузка товаров произошла ошибка!
-            <button @click.prevent="loadProducts">Попробовать ещё раз!</button>
+            <LoaderErrorInfo
+              title="Ошибка при загрузке товаров..."
+              v-on:reload="reload"
+            />
           </div>
           <ProductList v-if="!productsLoading" :products="products"/>
           <BasePagination
             v-model="page"
             :count="countProducts"
-            :per-page="productPerPage"
+            :per-page="productsPerPage"
           />
         </section>
 
@@ -43,40 +46,60 @@
 import ProductList from '@/components/ProductList.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import ProductFilter from '@/components/ProductFilter.vue';
+import LoaderErrorInfo from '@/components/LoaderErrorInfo';
 import declension from "@/helpers/declension";
-import axios from 'axios';
-import {API_BASE_URL} from "../config";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
     ProductFilter,
     ProductList,
     BasePagination,
-  },
-  data() {
-    return {
-      filterPriceFrom: 0,
-      filterPriceTo: 0,
-      filterCategoryId: 0,
-      filterColors: [],
-      filterMaterials: [],
-      filterSeasons: [],
-      page: 1,
-      productPerPage: 6,
-      productsData: null,
-      productsLoading: false,
-      productsLoadingFailed: false,
-    };
+    LoaderErrorInfo,
   },
   computed: {
-    products() {
-      return this.productsData ? this.productsData.items : [];
+    page: {
+      get() {
+        return this.$store.state.catalog.page;
+      },
+      set(value) {
+        this.$store.commit("catalog/setPage", value);
+      },
     },
-    countProducts() {
-      return this.productsData
-        ? this.productsData.pagination.total
-        : 0;
+    filterPriceFrom: {
+      get() { return this.$store.getters['catalog/getFilterPriceFrom'] },
+      set(value) { this.$store.commit("catalog/setFilterPriceFrom", value);},
     },
+    filterPriceTo: {
+      get() { return this.$store.getters['catalog/getFilterPriceTo'] },
+      set(value) { this.$store.commit("catalog/setFilterPriceTo", value);},
+    },
+    filterCategory: {
+      get() { return this.$store.getters['catalog/getFilterCategory'] },
+      set(value) { this.$store.commit("catalog/setFilterCategory", value);},
+    },
+    /*
+    filterColors: {
+      get() { return this.$store.getters['catalog/getFilterColors'] },
+      set(value) { this.$store.commit("catalog/setFilterColors", value);},
+    },
+    */
+    filterSeasons: {
+      get() { return this.$store.getters['catalog/getFilterSeasons'] },
+      set(value) { this.$store.commit("catalog/setFilterSeasons", value);},
+    },
+    filterMaterials: {
+      get() { return this.$store.getters['catalog/getFilterMaterials'] },
+      set(value) { this.$store.commit("catalog/setFilterMaterials", value);},
+    },
+    ...mapGetters("catalog", {
+      productsData: "getProductsData",
+      productsLoading: "getProductsLoading",
+      productsLoadingFailed: "getProductsLoadingFailed",
+      currentPage: "getPage",
+      productsPerPage: "getProductsPerPage",
+      countProducts: "getCountProducts",
+    }),
     countProductsString() {
       return (
         this.countProducts +
@@ -88,54 +111,35 @@ export default {
         ], this.countProducts)
       );
     },
+    products() {
+      return this.productsData ? this.productsData.items : []
+    },
   },
   methods: {
-    loadProducts() {
-      this.productsLoading = true;
-
-      clearTimeout(this.loadProductsTimer);
-      this.loadProductsTimer = setTimeout(() => {
-        axios
-          .get(API_BASE_URL + `/api/products`, {
-            params: {
-              categoryId: this.filterCategoryId,
-              materialIds: this.filterMaterials,
-              seasonIds: this.filterSeasons,
-              colorIds: this.filterColors,
-              page: this.page,
-              limit: this.productPerPage,
-              minPrice: this.filterPriceFrom,
-              maxPrice: this.filterPriceTo,
-            }
-          })
-          .then((response) => {
-            this.productsData = response.data;
-          })
-          .catch(() => {
-            this.productsLoadingFailed = true;
-          })
-          .then(() => {
-            this.productsLoading = false;
-          });
-      }, 0);
+    ...mapActions("catalog", ["loadProducts"]),
+    reload() {
+      this.loadProducts()
     },
+    updateFilter(newFilter) {
+      this.filterPriceFrom = newFilter.priceFrom;
+      this.filterPriceTo = newFilter.priceTo;
+      this.filterCategory = newFilter.categoryId;
+      //this.filterColors = newFilter.colors;
+      this.filterSeasons = newFilter.seasons;
+      this.filterMaterials = newFilter.materials;
+      this.loadProducts()
+    }
   },
   watch: {
+    countProducts() {
+      this.page = 1;
+    },
     page() {
-      this.loadProducts();
-    },
-    filterPriceFrom() {
-      this.loadProducts();
-    },
-    filterPriceTo() {
-      this.loadProducts();
-    },
-    filterCategoryId() {
       this.loadProducts();
     },
   },
   created() {
-    this.loadProducts();
+    this.loadProducts()
   },
 };
 </script>
