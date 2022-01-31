@@ -8,6 +8,9 @@ export default {
   getCartProducts(state) {
     return state.cartProducts;
   },
+  getCartItemsProducts(state) {
+    return state.cartProducts.reduce((sum, item) => sum + item.amount, 0);
+  },
   cartDetailProducts(state) {
     return state.cartProducts.map(item => {
       const product = state.cartProductsData.find(p => p.id === item.basketItemId);

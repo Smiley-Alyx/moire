@@ -31,10 +31,12 @@ export default {
     ...mapGetters('cart', {
       cartLoading: 'getCartLoading',
       cartLoadingError: 'getCartLoadingError',
-      cartProducts: 'getCartProducts'
+      cartProducts: 'getCartProducts',
+      cartItemsProducts: 'getCartItemsProducts',
     }),
     amount() {
-      return this.cartProducts ? this.cartProducts.length : '';
+      //return this.cartProducts ? this.cartProducts.length : '';
+      return this.cartItemsProducts ? this.cartItemsProducts : 0;
     }
   },
 };

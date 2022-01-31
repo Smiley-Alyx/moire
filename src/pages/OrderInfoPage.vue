@@ -107,7 +107,7 @@
             class="cart__total"
             v-if="orderPositionsCount"
           >
-            <p>Доставка: <b>500 ₽</b></p>
+            <p>Доставка: <b>{{ orderDeliveryPrice }} ₽</b></p>
             <p>Итого: <b>{{ orderPositionsCount }}</b> {{ infoString }} на сумму
               <b>{{ orderTotalPrice | numberFormat }} ₽</b></p>
           </div>
@@ -123,8 +123,6 @@ import CartProductInfo from '@/components/CartProductInfo';
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 import numberFormat from '@/helpers/numberFormat';
 import declension from '@/helpers/declension';
-import axios from 'axios';
-import { API_BASE_URL } from '@/config';
 
 export default {
   data() {
@@ -146,7 +144,8 @@ export default {
     }),
     ...mapGetters('cart', ['getUserAccessKey']),
     orderPositionsCount() {
-      return this.orderProducts ? this.orderProducts.length : 0;
+      //return this.orderProducts ? this.orderProducts.length : 0;
+      return this.orderProducts ? this.orderProducts.reduce((sum, item) => sum + item.product.quantity, 0) : 0;
     },
     infoString() {
       return declension([
@@ -156,79 +155,47 @@ export default {
       ], this.orderPositionsCount);
     },
     orderTotalPrice() {
+      return this.orderInfo.totalPrice;
+      /*
       return this.orderProducts.reduce(
         (acc, item) => {
           return acc + item.positionCost;
         }, 0
       );
+       */
+    },
+    orderDeliveryPrice() {
+      return this.orderInfo.deliveryType.price;
     }
   },
   methods: {
-    ...mapActions('order', [
-      'loadDeliveryData',
-      'loadPayments'
+    ...mapActions("order", [
+      'loadOrderInfo',
     ]),
-    ...mapMutations('cart', ['resetCart']),
-    ...mapMutations('order', ['updateOrderInfo']),
-    delivery_price(id) {
-      let delivery = this.deliveries.find(del => {
-        return del.id === id;
-      });
-      if (delivery) {
-        return delivery.price === '0' ? 'бесплатно' : delivery.price + ' ₽';
+    loadOrderDetails() {
+      let orderInfo = this.orderInfo;
+      if (orderInfo && (orderInfo.id === this.$route.params.id)) {
+        return;
       }
-    },
-    order() {
       this.loading = true;
-      this.formError = {};
-      this.formErrorMessage = '';
-      axios
-        .post(API_BASE_URL + `/api/orders`, {
-          ...this.formData
-        }, {
-          params: {
-            userAccessKey: this.getUserAccessKey
-          }
-        })
-        .then(response => {
-          this.resetCart();
-          this.formData = {};
-          this.formData.deliveryTypeId = 0;
-          this.formData.paymentTypeId = 0;
-          this.updateOrderInfo(response.data);
-          this.$router.push({
-            name: 'orderInfo',
-            params: { id: response.data.id }
-          });
-        })
-        .catch(error => {
-          this.formErrorMessage = error.response.data.error.message;
-          this.formError = error.response.data.error.request || {};
+      this.loadOrderInfo({
+        orderId: this.$route.params.id,
+        userAccessKey: this.getUserAccessKey
+      })
+        .catch((err) => {
+          console.log(err);
+          this.$router.replace({name: 'notFound', params: { '0': '/' }});
         })
         .then(() => this.loading = false);
     },
   },
   watch: {
-    currentPayments() {
-      if (!this.formData.paymentTypeId && this.currentPayments) {
-        this.formData.paymentTypeId = this.currentPayments[0].id;
-      }
-    },
-    'formData.deliveryTypeId': {
-      deep: true,
-      handler(value) {
-        if (value && this.currentPayments[0]) {
-          this.formData.paymentTypeId = this.currentPayments[0].id;
-        } else {
-          this.formData.paymentTypeId = null;
-        }
-      }
+    '$route.params.id': {
+      handler() {
+        this.loadOrderDetails()
+      },
+      immediate: true
     }
-  },
-  async created() {
-    await this.loadDeliveryData();
-    await this.loadPayments();
-    this.formData.deliveryTypeId = this.deliveries[0].id;
   },
 };
 </script>

@@ -94,7 +94,7 @@
                     v-model.number="formData.deliveryTypeId"
                   />
                   <span class="options__value">
-                    {{ delivery.title }} <b>{{ delivery_price(delivery.id) }}</b>
+                    {{ delivery.title }} <b>{{ deliveryPriceFormatted(delivery.id) }}</b>
                   </span>
                 </label>
               </li>
@@ -132,9 +132,9 @@
           </ul>
 
           <div class="cart__total">
-            <p>Доставка: <b>{{ delivery_price(formData.deliveryTypeId) }}</b></p>
-            <p>Итого: <b>{{ cartPositionsCount }}</b> {{ infoString }} на сумму
-              <b>{{ cartTotalPrice | numberFormat }} ₽</b></p>
+            <p>Доставка: <b>{{ totalDeliveryPrice }}</b></p>
+            <p>Итого: <b>{{ getCartItemsProducts }}</b> {{ infoString }} на сумму
+              <b>{{ totalCartPrice | numberFormat }} ₽</b></p>
           </div>
 
           <BaseSubmit
@@ -195,8 +195,8 @@ export default {
     ...mapGetters('cart', [
       'cartDetailProducts',
       'cartTotalPrice',
-      'cartPositionsCount',
-      'getUserAccessKey'
+      'getUserAccessKey',
+      'getCartItemsProducts',
     ]),
     ...mapGetters('order', [
       'getDeliveryData',
@@ -207,7 +207,7 @@ export default {
         'товар',
         'товара',
         'товаров',
-      ], this.cartPositionsCount);
+      ], this.getCartItemsProducts);
     },
     deliveries() {
       return this.getDeliveryData || [];
@@ -222,6 +222,14 @@ export default {
       });
       return currentPaymentsItems ? currentPaymentsItems.items : [];
     },
+    totalDeliveryPrice() {
+      let deliveryPrice = this.deliveryPrice(this.formData.deliveryTypeId);
+      return deliveryPrice === '0' ? 'бесплатно' : deliveryPrice + ' ₽';
+    },
+    totalCartPrice() {
+      let deliveryPrice = this.deliveryPrice(this.formData.deliveryTypeId);
+      return parseFloat(this.cartTotalPrice) + parseFloat(deliveryPrice);
+    },
   },
   methods: {
     ...mapActions('order', [
@@ -230,13 +238,17 @@ export default {
     ]),
     ...mapMutations('cart', ['resetCart']),
     ...mapMutations('order', ['updateOrderInfo']),
-    delivery_price(id) {
+    deliveryPrice(id) {
       let delivery = this.deliveries.find(del => {
         return del.id === id;
       });
       if (delivery) {
-        return delivery.price === '0' ? 'бесплатно' : delivery.price + ' ₽';
+        return delivery.price;
       }
+    },
+    deliveryPriceFormatted(id) {
+      let deliveryPrice = this.deliveryPrice(id);
+      return deliveryPrice === '0' ? 'бесплатно' : deliveryPrice + ' ₽';
     },
     order() {
       this.loading = true;
