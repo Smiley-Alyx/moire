@@ -224,7 +224,11 @@ export default {
     currentImage() {
       let color = this.currentColorId;
       if (color) {
-        return color.gallery[0].file.url;
+        if (color.gallery) {
+          return color.gallery[0].file.url;
+        } else {
+          return "./img/not_image.png";
+        }
       } else {
         return null;
       }
@@ -233,9 +237,11 @@ export default {
       let images = [];
       let color = this.currentColorId;
       if (color) {
-        color.gallery.forEach(item => {
-          images.push(item.file.url);
-        });
+        if (color.gallery) {
+          color.gallery.forEach(item => {
+            images.push(item.file.url);
+          });
+        }
       }
       return images;
     }

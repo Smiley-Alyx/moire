@@ -48,7 +48,7 @@ export default {
       });
       return this.product.colors[colorId].gallery
         ? this.product.colors[colorId].gallery[0].file.url
-        : "/img/not_image.png";
+        : "./img/not_image.png";
     },
   },
   methods: {
